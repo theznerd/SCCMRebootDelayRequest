@@ -6,12 +6,23 @@ function GenerateResponse($challengeItem,$length){
 	$response
 }
 
+#####################################################
+######### BEGIN USER CONFIGURABLE CODE HERE #########
+#####################################################
+#Setup Your Credentials
+$key = (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32)
+$secureString = ""
+$userForTransfer = ""
+$password = ConvertTo-SecureString $secureString -Key $key
+$credentials = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $userForTransfer, $password
+
 #Path to a temporary location writable by the user...
 $userPath = "C:\Users\$env:USERNAME\Documents"
 
 #Would you like to enable e-mail?
 $enableEmail = $true
 
+#Configure your e-mail here...
 function sendMail($lengthOfDelay){
   if($enableEmail){
   	#SMTP server name
@@ -30,17 +41,13 @@ function sendMail($lengthOfDelay){
   	$msgBody = "A reboot delay request for $lengthOfDelay hour(s) has been processed for `n`nUser: $env:USERNAME `n`nComputer: $env:COMPUTERNAME"
   	$smtp.UseDefaultCredentials = $true
   
-  	#setup credentials
-  	$key = (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32)
-  	$secureString = ""
-  	$userForTransfer = ""
-  	$password = ConvertTo-SecureString $secureString -Key $key
-  	$credentials = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $userForTransfer, $password
-  	
     #Sending email
-  	Send-MailMessage -Body $msgBody -Subject $msgSubject -To $msgTo -From $msgFrom -SmtpServer $smtpServer -Credential $credentials
+    Send-MailMessage -Body $msgBody -Subject $msgSubject -To $msgTo -From $msgFrom -SmtpServer $smtpServer -Credential $credentials
   }
 }
+##############################################
+######### END USER CONFIGURABLE CODE #########
+##############################################
 
 function GenerateForm {
 ########################################################################
@@ -95,13 +102,6 @@ $button_Submit_OnClick=
 			$response4 = $BoxResponse4.Text
 			
 			if(($response1 -eq (GenerateResponse $challenge1 $hours))-and ($response2 -eq (GenerateResponse $challenge2 $hours))-and ($response3 -eq (GenerateResponse $challenge3 $hours)) -and ($response4 -eq (GenerateResponse $challenge4 $hours))){
-				#setup credentials
-				$key = (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32)
-				$secureString = ""
-				$userForTransfer = ""
-				$password = ConvertTo-SecureString $secureString -Key $key
-				$credentials = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $userForTransfer, $password
-				
 				$seconds = $hours * 60 * 60 #convert the delay to seconds
 				$argumentList = "-WindowStyle Hidden -noprofile -command &{Start-Process 'shutdown.exe' -ArgumentList '-t $seconds -r' -Verb RunAs}"
 				Start-Process powershell -Wait -Credential $credentials -ArgumentList "-WindowStyle Hidden -noprofile -command &{Start-Process 'net.exe' -Wait -ArgumentList 'stop CCMExec' -Verb RunAs -WorkingDirectory 'C:\Windows\System32'}" -WorkingDirectory 'C:\Windows\System32'
@@ -135,13 +135,6 @@ $handler_main_Load=
 
 	#well, maybe they only have 30 seconds left before the reboot... this will give them an extra amount of time... but only once per completed C/R
 	if(-not (Test-Path "c:\install_logs\RebootDelayRequested.log")){
-		#setup credentials
-		$key = (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32)
-		$secureString = ""
-		$userForTransfer = ""
-		$password = ConvertTo-SecureString $secureString -Key $key
-		$credentials = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $userForTransfer, $password
-		
 		$seconds = 1800 #30 minutes extra for my homies...
 		$argumentList = "-WindowStyle Hidden -noprofile -command &{Start-Process 'shutdown.exe' -ArgumentList '-t $seconds -r' -Verb RunAs}"
 		Start-Process powershell -Wait -Credential $credentials -ArgumentList "-WindowStyle Hidden -noprofile -command &{Start-Process 'net.exe' -Wait -ArgumentList 'stop CCMExec' -Verb RunAs -WorkingDirectory 'C:\Windows\System32'}" -WorkingDirectory 'C:\Windows\System32'
